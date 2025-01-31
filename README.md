@@ -1,5 +1,3 @@
-# security-dashboard
-
 # Security Dashboard
 
 A web-based dashboard for monitoring and visualizing security-related data, such as flagged IP addresses, login attempts, and real-time alerts.
