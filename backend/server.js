@@ -1,7 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const port = 3000;
+require('dotenv').config();
+
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});
 
 // Enable CORS
 app.use(cors());
@@ -53,3 +59,43 @@ app.get('/api/alerts', (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
+
+const rateLimit = require('express-rate-limit');
+
+// Rate limiting configuration
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+});
+
+// Apply rate limiting to all requests
+app.use(limiter);
+
+const helmet = require('helmet');
+
+// Use Helmet to set secure HTTP headers
+app.use(helmet());
+
+const { body, validationResult } = require('express-validator');
+
+// Login endpoint with input validation
+app.post('/api/login', [
+    body('username').trim().notEmpty().withMessage('Username is required'),
+    body('password').trim().notEmpty().withMessage('Password is required'),
+], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { username, password } = req.body;
+
+    // Simulate authentication
+    if (username === 'admin' && password === 'password') {
+        res.json({ message: 'Login successful' });
+    } else {
+        res.status(401).json({ message: 'Invalid username or password' });
+    }
+});
+
